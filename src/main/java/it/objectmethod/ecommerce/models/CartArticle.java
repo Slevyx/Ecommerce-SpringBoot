@@ -2,17 +2,17 @@ package it.objectmethod.ecommerce.models;
 
 public class CartArticle {
 	
-	private int id;
+	private Integer id;
 	private String name;
 	private String code;
-	private int quantity;
-	private int availability;
-	private double price;
+	private Integer quantity;
+	private Integer availability;
+	private Double price;
 	
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 	public String getName() {
@@ -27,22 +27,22 @@ public class CartArticle {
 	public void setCode(String code) {
 		this.code = code;
 	}
-	public int getQuantity() {
+	public Integer getQuantity() {
 		return quantity;
 	}
-	public void setQuantity(int quantity) {
+	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
 	}
-	public int getAvailability() {
+	public Integer getAvailability() {
 		return availability;
 	}
-	public void setAvailability(int availability) {
+	public void setAvailability(Integer availability) {
 		this.availability = availability;
 	}
-	public double getPrice() {
+	public Double getPrice() {
 		return price;
 	}
-	public void setPrice(double price) {
+	public void setPrice(Double price) {
 		this.price = price;
 	}
 }

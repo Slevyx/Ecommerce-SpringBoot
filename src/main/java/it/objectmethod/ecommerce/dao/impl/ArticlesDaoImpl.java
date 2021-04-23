@@ -35,7 +35,7 @@ public class ArticlesDaoImpl implements IArticlesDao{
 				article.setCode(resultSet.getString("codice_articolo"));
 				article.setName(resultSet.getString("nome_articolo"));
 				article.setAvailability(resultSet.getInt("disponibilita"));
-				article.setPrice(resultSet.getFloat("prezzo_unitario"));
+				article.setPrice(resultSet.getDouble("prezzo_unitario"));
 				articlesList.add(article);
 			}
 			resultSet.close();

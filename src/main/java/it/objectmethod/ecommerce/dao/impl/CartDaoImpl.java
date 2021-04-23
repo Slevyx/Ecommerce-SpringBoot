@@ -73,7 +73,7 @@ public class CartDaoImpl implements ICartDao{
 				cartArticle.setName(resultSet.getString("nome_articolo"));
 				cartArticle.setQuantity(resultSet.getInt("quantita"));
 				cartArticle.setAvailability(resultSet.getInt("disponibilita"));
-				cartArticle.setPrice(resultSet.getInt("prezzo_unitario"));
+				cartArticle.setPrice(resultSet.getDouble("prezzo_unitario"));
 				cartList.add(cartArticle);
 			}
 			resultSet.close();
