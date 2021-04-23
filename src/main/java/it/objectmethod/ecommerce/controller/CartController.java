@@ -20,24 +20,23 @@ public class CartController {
 
 	@Autowired
 	private ICartDao cartDao;
-	
+
 	@GetMapping("/shop")
-	public String loadShopPage(HttpSession session) {
+	public String loadShopPage(HttpSession session, ModelMap map) {
 		String username = (String) session.getAttribute("loggedUser");
-		String forwardTo = "LoginPage";
+		String forwardTo = "redirect:/login";
 		int cartCounter = 0;
 		if(username != null) {
 			forwardTo = "ShopPage";
 			cartCounter = cartDao.getUserArticlesNumber(username);
-			session.setAttribute("user_articles", cartCounter);
+			map.addAttribute("user_articles", cartCounter);
 		}
 		return forwardTo;
 	}
-
+	
 	@GetMapping("/addToCart/article/{articleId}")
-	public String addToCart(@PathVariable("articleId") int id, HttpSession session) {
+	public String addToCart(@PathVariable("articleId") int id, HttpSession session, ModelMap map) {
 		String username = (String) session.getAttribute("loggedUser");
-		int cartCounter = 0;
 		int previousQuantity = 0;
 		if(cartDao.isArticleAlreadyInTheCart(username, id)) {
 			//UPDATE
@@ -48,47 +47,37 @@ public class CartController {
 			//INSERT INTO
 			cartDao.addToCart(username, id, 1);
 		}
-		cartCounter = cartDao.getUserArticlesNumber(username);
-		session.setAttribute("user_articles", cartCounter);
-		return "ShopPage";
+		return "redirect:/articles";
 	}
 	
 	@GetMapping("/cart")
-	public String getTotal(HttpSession session) {
+	public String getTotal(HttpSession session, ModelMap map) {
 		String username = (String) session.getAttribute("loggedUser");
 		List<CartArticle> cartList = new ArrayList<>();
 		double total = 0;
-		cartList = cartDao.getUserCartList(username);
-		total = cartDao.getTotal(username);
-		session.setAttribute("cartList", cartList);
-		session.setAttribute("total", total);
-		return "CartPage";
+		String forwardTo = "redirect:/login";
+		if(username != null) {
+			forwardTo = "CartPage";
+			cartList = cartDao.getUserCartList(username);
+			total = cartDao.getTotal(username);
+			map.addAttribute("cartList", cartList);
+			map.addAttribute("total", total);
+		}
+		return forwardTo;
 	}
 	
 	@GetMapping("/addOne/article/{articleId}")
 	public String addOneArticle(@PathVariable("articleId") int id, HttpSession session) {
 		String username = (String) session.getAttribute("loggedUser");
-		List<CartArticle> cartList = new ArrayList<>();
-		int cartCounter = 0;
-		double total = 0;
 		int previousQuantity = 0;
 		previousQuantity = cartDao.getPreviousQuantity(username, id);
 		cartDao.updateArticleQuantity(username, id, previousQuantity + 1);
-		cartList = cartDao.getUserCartList(username);
-		cartCounter = cartDao.getUserArticlesNumber(username);
-		total = cartDao.getTotal(username);
-		session.setAttribute("total", total);
-		session.setAttribute("user_articles", cartCounter);
-		session.setAttribute("cartList", cartList);
-		return "CartPage";
+		return "redirect:/cart";
 	}
 	
 	@GetMapping("/removeOne/article/{articleId}")
 	public String removeOneArticle(@PathVariable("articleId") int id, HttpSession session) {
 		String username = (String) session.getAttribute("loggedUser");
-		List<CartArticle> cartList = new ArrayList<>();
-		int cartCounter = 0;
-		double total = 0;
 		int previousQuantity = 0;
 		int newQuantity = 0;
 		previousQuantity = cartDao.getPreviousQuantity(username, id);
@@ -99,48 +88,35 @@ public class CartController {
 		else {
 			cartDao.removeAllArticles(username, id);
 		}
-		cartList = cartDao.getUserCartList(username);
-		cartCounter = cartDao.getUserArticlesNumber(username);
-		total = cartDao.getTotal(username);
-		session.setAttribute("total", total);
-		session.setAttribute("user_articles", cartCounter);
-		session.setAttribute("cartList", cartList);
-		return "CartPage";
+		return "redirect:/cart";
 	}
 	
 	@GetMapping("/removeAll/article/{articleId}")
 	public String removeAllArticle(@PathVariable("articleId") int id, HttpSession session) {
 		String username = (String) session.getAttribute("loggedUser");
-		List<CartArticle> cartList = new ArrayList<>();
-		int cartCounter = 0;
-		double total = 0;
 		cartDao.removeAllArticles(username, id);
-		cartList = cartDao.getUserCartList(username);
-		cartCounter = cartDao.getUserArticlesNumber(username);
-		total = cartDao.getTotal(username);
-		session.setAttribute("total", total);
-		session.setAttribute("user_articles", cartCounter);
-		session.setAttribute("cartList", cartList);
-		return "CartPage";
+		return "redirect:/cart";
 	}
 	
-	@GetMapping("/buy")
+	@GetMapping("/cart/buy")
 	public String buy(HttpSession session, ModelMap map) {
 		String username = (String) session.getAttribute("loggedUser");
-		List<CartArticle> cartList = new ArrayList<>();
-		cartList = cartDao.getUserCartList(username);
-		List<CartArticle> filteredCartList = cartList.stream().filter(article -> article.getQuantity() > article.getAvailability()).collect(Collectors.toList());
-		if(filteredCartList.isEmpty()) {
-			cartDao.updateArticlesAvailability(username);
-			cartDao.buyArticles(username);
-			session.removeAttribute("cartList");
-			session.setAttribute("user_articles", 0);
-			map.addAttribute("purchaseMessage", "Your products have been purchased successfully!");
+		String forwardTo = "redirect:/login";
+		if(username != null) {
+			forwardTo = "CartPage";
+			List<CartArticle> cartList = new ArrayList<>();
+			cartList = cartDao.getUserCartList(username);
+			List<CartArticle> filteredCartList = cartList.stream().filter(article -> article.getQuantity() > article.getAvailability()).collect(Collectors.toList());
+			if(filteredCartList.isEmpty()) {
+				cartDao.updateArticlesAvailability(username);
+				cartDao.buyArticles(username);
+				map.addAttribute("purchaseMessage", "Your products have been purchased successfully!");
+			}
+			else {
+				map.addAttribute("articlesAvailabilityMessage", "One or more selected articles are not available. Please remove unavailable products to complete the purchase.");
+				map.addAttribute("cartList", cartList);
+			}
 		}
-		else {
-			map.addAttribute("articlesAvailabilityMessage", "One or more selected articles are not available. Please remove unavailable products to complete the purchase.");
-			session.setAttribute("cartList", cartList);
-		}
-		return "CartPage";
+		return forwardTo;
 	}
 }

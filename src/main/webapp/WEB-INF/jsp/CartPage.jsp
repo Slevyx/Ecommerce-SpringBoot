@@ -64,7 +64,7 @@
 		</c:otherwise>
 	</c:choose>
 	<c:if test="${not empty cartList && empty articlesAvailabilityMessage}">
-		<div class="width-20"><a href="/buy"><button type="button" class="btn btn-success">BUY</button></a></div>
+		<div class="width-20"><a href="/cart/buy"><button type="button" class="btn btn-success">BUY</button></a></div>
 		<div class="total">Total:${total}&euro;</div>
 	</c:if>
 	<h3>${articlesAvailabilityMessage}</h3>
